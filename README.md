@@ -9,23 +9,7 @@ whether the default branch is green, and the open PR and issue counts. From
 there you can jump straight to logs, watch a run live, re-run failed jobs or
 open the right page in the browser.
 
-```
- gh radar   12 repos  ✗ 1 failing  ● 1 running                        sort: attention · updated 5s ago
-     REPOSITORY · LATEST RUN                           BRANCH · TRIGGER      RECENT      AGE    MAIN     PRS
-▌ ✗  acme/payments-api                                 ⎇ main                ●●●●●●●●●●  12m    ✗ main     4
-▌    Deploy to Staging · Merge pull request #212 fr…   push                              2m41s
-  ◐  acme/web-frontend                                 ⎇ feat/new-checkout   ●●●●●●●●●●  1m     ✓ main     7
-     CI · feat: redesign checkout flow                 pull_request                      1m02s
-  ✓  octocat/dotfiles                                  ⎇ main                     ●●●●●  3d     ✓ main     0
-     Lint · tweak zsh prompt                           push                              21s
-┌ acme/payments-api ───────────────────────────────────────────────────────────────────────────────────────┐
-│ Payment processing service                             JOBS                                              │
-│                                                        ✗ deploy / docker-build  48s                      │
-│ ✗ Deploy to Staging #318 failed                          └ ✗ Configure AWS credentials                   │
-│ Merge pull request #212 from acme/fix-retries          ✓ test  1m52s                                     │
-│ ⎇ main · push · by octocat                             ✓ lint  31s                                       │
-└──────────────────────────────────────────────────────────────────────────────────────────────────────────┘
-```
+![gh radar demo](demo/demo.gif)
 
 Each repo takes two lines: the name, then its latest run. **RECENT** shows the
 last 10 run results, newest on the right. The details pane at the bottom (or
@@ -148,6 +132,15 @@ which opens at the end of the log where errors usually are (`more` on Windows).
 Each refresh makes one REST call per repo plus a single GraphQL call for all
 of them, so about 60 repos at the default interval stays well within GitHub's
 rate limit.
+
+## Recording the demo
+
+`demo/demo.gif` is recorded with [VHS](https://github.com/charmbracelet/vhs)
+from `demo/demo.tape`, using `demo/config.toml`, which tracks only public repos:
+
+```sh
+vhs demo/demo.tape
+```
 
 ## Releasing
 
