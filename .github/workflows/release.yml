@@ -1,0 +1,78 @@
+# Builds binaries for every platform, then publishes them in a single GitHub
+# release, named the way `gh extension install` expects (gh-radar-<os>-<arch>).
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            asset: gh-radar-darwin-arm64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            asset: gh-radar-darwin-amd64
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            asset: gh-radar-linux-amd64
+          - os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
+            asset: gh-radar-linux-arm64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            asset: gh-radar-windows-amd64.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check tag matches Cargo.toml version
+        shell: bash
+        run: |
+          version=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
+          if [[ "$GITHUB_REF_NAME" != "v$version" ]]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match Cargo.toml version $version"
+            exit 1
+          fi
+
+      - name: Install musl tools
+        if: contains(matrix.target, 'musl')
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - run: cargo build --release --locked --target ${{ matrix.target }}
+
+      - name: Stage binary
+        shell: bash
+        run: |
+          src="target/${{ matrix.target }}/release/gh-radar"
+          [[ "${{ matrix.target }}" == *windows* ]] && src="$src.exe"
+          mkdir dist
+          cp "$src" "dist/${{ matrix.asset }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: dist/*
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - run: gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

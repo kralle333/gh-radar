@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Entry point used when the extension is installed from source
+# (`gh extension install .` or from a repo without release binaries).
+# Builds the release binary on first use, then hands over to it.
+set -euo pipefail
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+bin="$dir/target/release/gh-radar"
+if [[ ! -x "$bin" ]]; then
+  echo "gh-radar: building release binary (first run only)..." >&2
+  cargo build --release --quiet --manifest-path "$dir/Cargo.toml" >&2
+fi
+exec "$bin" "$@"
