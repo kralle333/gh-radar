@@ -45,6 +45,9 @@ impl Config {
     }
 
     pub fn load() -> Result<Self> {
+        if crate::demo::enabled() {
+            return Ok(crate::demo::config());
+        }
         let path = Self::path();
         match std::fs::read_to_string(&path) {
             Ok(text) => toml::from_str(&text)
@@ -55,6 +58,9 @@ impl Config {
     }
 
     pub fn save(&self) -> Result<()> {
+        if crate::demo::enabled() {
+            return Ok(());
+        }
         let path = Self::path();
         if let Some(dir) = path.parent() {
             std::fs::create_dir_all(dir)?;

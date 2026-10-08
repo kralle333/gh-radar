@@ -136,11 +136,16 @@ rate limit.
 ## Recording the demo
 
 `demo/demo.gif` is recorded with [VHS](https://github.com/charmbracelet/vhs)
-from `demo/demo.tape`, using `demo/config.toml`, which tracks only public repos:
+from `demo/demo.tape`:
 
 ```sh
-vhs demo/demo.tape
+cargo build --release && vhs demo/demo.tape
 ```
+
+The tape sets `GH_RADAR_DEMO=1`, which makes gh radar use fictional accounts
+and repos (`alex-dev`, `octo-labs`, `acme-corp`) instead of calling GitHub. That
+way the recording never shows real repositories, and it never writes to your
+config.
 
 ## Releasing
 

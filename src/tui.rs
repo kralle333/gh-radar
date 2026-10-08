@@ -726,6 +726,10 @@ impl App {
     }
 
     fn run_gh_action(&mut self, repo: String, args: Vec<String>, done: String) {
+        if crate::demo::enabled() {
+            self.set_flash("not available in demo mode", Color::Yellow);
+            return;
+        }
         let tx = self.tx.clone();
         self.set_flash("working…", Color::Yellow);
         std::thread::spawn(move || {
@@ -748,6 +752,10 @@ impl App {
         pause: bool,
         run: impl FnOnce() -> std::io::Result<()>,
     ) -> Result<()> {
+        if crate::demo::enabled() {
+            self.set_flash("not available in demo mode", Color::Yellow);
+            return Ok(());
+        }
         disable_raw_mode()?;
         execute!(std::io::stdout(), LeaveAlternateScreen, cursor::Show)?;
         let status = run();
@@ -1914,6 +1922,9 @@ fn page_logs(repo: &str, run_id: u64, flag: &str) -> std::io::Result<()> {
 }
 
 fn open_url(url: &str) {
+    if crate::demo::enabled() {
+        return;
+    }
     let opener = if cfg!(target_os = "macos") {
         "open"
     } else if cfg!(windows) {

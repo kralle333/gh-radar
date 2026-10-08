@@ -1,4 +1,5 @@
 mod config;
+mod demo;
 mod fmt;
 mod github;
 mod scan;

@@ -81,6 +81,9 @@ impl Job {
 
 /// Jobs of the latest attempt of a run.
 pub fn fetch_jobs(repo: &str, run_id: u64) -> Result<Vec<Job>> {
+    if crate::demo::enabled() {
+        return Ok(crate::demo::jobs(run_id));
+    }
     let v = gh(&[
         "api",
         &format!("repos/{repo}/actions/runs/{run_id}/jobs?per_page=100"),
@@ -296,6 +299,9 @@ fn graphql_error(v: &Value, alias: &str) -> Option<String> {
 /// Fetches workflow runs for every repo (in parallel) and, if `with_meta`,
 /// repository metadata as well. Results keep the order of `repos`.
 pub fn fetch(repos: &[String], with_meta: bool, ignore: &[String]) -> Vec<RepoStatus> {
+    if crate::demo::enabled() {
+        return crate::demo::statuses(repos);
+    }
     let next = AtomicUsize::new(0);
     let runs: Mutex<Vec<RunsResult>> = Mutex::new(vec![None; repos.len()]);
     let mut meta = HashMap::new();
@@ -363,6 +369,9 @@ impl Available {
 /// Every repo the viewer owns, collaborates on, or can access through an
 /// organization or team, most recently pushed first.
 pub fn fetch_accessible() -> Result<Vec<Available>> {
+    if crate::demo::enabled() {
+        return Ok(crate::demo::accessible());
+    }
     let out = Command::new("gh")
         .args([
             "api",
