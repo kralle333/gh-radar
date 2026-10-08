@@ -1,5 +1,8 @@
 # gh radar
 
+> [!WARNING]
+> This project is AI generated using [Claude](https://claude.ai). Use at your own risk.
+
 A [`gh`](https://cli.github.com) extension that shows all the repos you're
 juggling in one terminal dashboard: the latest workflow run for each repo,
 whether the default branch is green, and the open PR and issue counts. From
